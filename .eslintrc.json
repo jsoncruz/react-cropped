@@ -1,0 +1,64 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "plugin:react/recommended",
+    "airbnb",
+    "plugin:react-hooks/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": ["react", "@typescript-eslint", "eslint-plugin-import-helpers"],
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "max-len": ["error", { "code": 130 }],
+    "quote-props": ["error", "as-needed"],
+    "no-plusplus": "off",
+    "global-require": "off",
+    "linebreak-style": "off",
+    "react/prop-types": "off",
+    "no-param-reassign": "off",
+    "import/no-unresolved": "off",
+    "no-use-before-define": "off",
+    "no-unused-expressions": "off",
+    "react/require-default-props": "off",
+    "import/prefer-default-export": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "import/extensions": [
+      "error",
+      {
+        "tsx": "ignorePackages"
+      }
+    ],
+    "react/jsx-filename-extension": [
+      "error",
+      { "extensions": [".js", ".jsx", ".ts", ".tsx"] }
+    ],
+    "object-curly-newline": [
+      "error",
+      {
+        "multiline": true,
+        "minProperties": 5
+      }
+    ],
+    "import-helpers/order-imports": [
+      "warn",
+      {
+        "newlinesBetween": "always",
+        "groups": ["/^react$/", "/^react-/", "module", "/^@shared/", ["parent", "sibling", "index"]],
+        "alphabetize": { "order": "asc", "ignoreCase": false }
+      }
+    ]
+  }
+}
