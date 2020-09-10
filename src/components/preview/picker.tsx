@@ -1,6 +1,5 @@
 import React, {
   useImperativeHandle,
-  useLayoutEffect,
   useCallback,
   useContext,
   useEffect,
@@ -39,21 +38,21 @@ interface PickerProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLD
 export interface ImperativePickerProps {
   picker: HTMLDivElement | null;
   clear(): void;
-}
-
-interface DraggingLimits {
-  vertical: { from: number; to: number; };
-  horizontal: { from: number; to: number; };
+  isPicked: boolean;
 }
 
 const Picker = React.forwardRef<ImperativePickerProps, PickerProps>(({ initial, final, ...props }, ref) => {
   const { image } = useContext(Context);
   const pickerRef = useRef<HTMLDivElement>(null);
 
-  const [draggingLimits, setDraggingLimits] = useState<DraggingLimits>();
+  const [isDragging, setDragging] = useState(false);
+  const [rectBounding, setRectBounding] = useState<DOMRect>();
+  const [initialMovementOffset, setInitialMovementOffset] = useState<Array<number>>();
+
+  const { isInteractivityEnabled } = props;
 
   useMemo(() => {
-    if (props.isInteractivityEnabled) {
+    if (isInteractivityEnabled) {
       if (pickerRef.current) {
         pickerRef.current.style.display = 'initial';
         const { current: section } = pickerRef;
@@ -79,66 +78,81 @@ const Picker = React.forwardRef<ImperativePickerProps, PickerProps>(({ initial, 
         }
       }
     }
-  }, [props.isInteractivityEnabled, initial, final]);
+  }, [isInteractivityEnabled, initial, final]);
 
   const handleReset = useCallback(() => {
     if (pickerRef.current) {
       pickerRef.current.removeAttribute('style');
+      setDragging(false);
+      setRectBounding(undefined);
+      setInitialMovementOffset(undefined);
     }
   }, []);
 
-  const handleMouseDown = useCallback<MouseHandling>(() => {
+  const handleMouseDown = useCallback<MouseHandling>(({ clientX, clientY }) => {
     if (pickerRef.current) {
       pickerRef.current.style.cursor = 'grabbing';
-    }
-  }, []);
-  const handleMouseMove = useCallback<MouseHandling>(({ nativeEvent }) => {
-    if (pickerRef.current) {
-      //
-    }
-  }, []);
-  const handleMouseLeave = useCallback<MouseHandling>(() => {
-    if (pickerRef.current) {
-      pickerRef.current.style.cursor = 'grab';
+      setInitialMovementOffset([
+        pickerRef.current.offsetLeft - clientX,
+        pickerRef.current.offsetTop - clientY,
+      ]);
+      setDragging(true);
     }
   }, []);
 
-  useLayoutEffect(() => {
-    if (props.parent) {
-      const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = props.parent;
-      setDraggingLimits({
-        vertical: { from: offsetTop, to: offsetHeight },
-        horizontal: { from: offsetLeft, to: offsetWidth },
-      });
+  const handleMouseUp = useCallback(() => {
+    if (pickerRef.current && isInteractivityEnabled === false) {
+      pickerRef.current.style.cursor = 'grab';
+      setDragging(false);
     }
-  }, [props.parent]);
+  }, [isInteractivityEnabled]);
+
+  const handleMouseMove = useCallback<MouseHandling>(({ clientX, clientY, currentTarget }) => {
+    if (pickerRef.current && isInteractivityEnabled === false && isDragging) {
+      if (rectBounding && initialMovementOffset) {
+        const { left, top } = currentTarget.getBoundingClientRect();
+        if (left > rectBounding.left) {
+          pickerRef.current.style.left = `${clientX + initialMovementOffset[0]}px`;
+        } else {
+          handleMouseUp();
+        }
+        pickerRef.current.style.top = `${clientY + initialMovementOffset[1]}px`;
+      }
+    }
+  }, [handleMouseUp, initialMovementOffset, isDragging, isInteractivityEnabled, rectBounding]);
 
   useEffect(() => {
     if (pickerRef.current) {
       if (pickerRef.current.hasAttribute('style')) {
         if (image) {
-          const isDragging = props.isInteractivityEnabled === false;
-          pickerRef.current.style.pointerEvents = isDragging ? 'auto' : 'none';
-          pickerRef.current.style.cursor = isDragging ? 'grab' : 'default';
+          pickerRef.current.style.pointerEvents = rectBounding ? 'auto' : 'none';
+          pickerRef.current.style.cursor = rectBounding ? 'grab' : 'default';
         }
         if (image === null) {
           handleReset();
         }
       }
     }
-  }, [handleReset, image, props.isInteractivityEnabled]);
+  }, [handleReset, image, rectBounding]);
+
+  useMemo(() => {
+    if (props.parent && isInteractivityEnabled === false) {
+      setRectBounding(props.parent.getBoundingClientRect());
+    }
+  }, [isInteractivityEnabled, props.parent]);
 
   useImperativeHandle(ref, () => ({
     picker: pickerRef.current,
     clear: () => handleReset(),
-  }), [handleReset]);
+    isPicked: !!rectBounding,
+  }), [handleReset, rectBounding]);
 
   return (
     <PickerArea
       {...props}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onMouseUp={handleMouseUp}
       ref={pickerRef}
     />
   );
