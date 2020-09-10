@@ -101,7 +101,7 @@ const Preview = React.forwardRef<ImperativePreviewProps, PreviewProps>(({ generi
     <>
       <Image
         draggable="false"
-        alt="Preview"
+        alt="preview"
         {...props}
         ref={imgRef}
         onMouseOver={handleMouseOver}
