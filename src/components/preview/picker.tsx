@@ -45,6 +45,8 @@ const Picker = React.forwardRef<ImperativePickerProps, PickerProps>(({ initial, 
   const { image } = useContext(Context);
   const pickerRef = useRef<HTMLDivElement>(null);
 
+  const mouseRef = useRef({ x: 0, y: 0 });
+
   const [isDragging, setDragging] = useState(false);
   const [rectBounding, setRectBounding] = useState<DOMRect>();
   const [initialMovementOffset, setInitialMovementOffset] = useState<Array<number>>();
@@ -107,14 +109,32 @@ const Picker = React.forwardRef<ImperativePickerProps, PickerProps>(({ initial, 
     }
   }, [isInteractivityEnabled]);
 
-  const handleMouseMove = useCallback<MouseHandling>(({ clientX, clientY, currentTarget }) => {
+  const handleMouseMove = useCallback<MouseHandling>(({ clientX, clientY, pageX, pageY, ...rest }) => {
     if (pickerRef.current && isInteractivityEnabled === false && isDragging) {
       if (rectBounding && initialMovementOffset) {
-        const { x, y, width, height } = currentTarget.getBoundingClientRect();
-        // const horizontal = x > rectBounding.left && x < (rectBounding.width - width);
-        // const vertical = y > rectBounding.top && y < (rectBounding.height - height);
-        pickerRef.current.style.left = `${clientX + initialMovementOffset[0]}px`;
-        pickerRef.current.style.top = `${clientY + initialMovementOffset[1]}px`;
+        const mouse = mouseRef.current;
+        const { x, y, width, height } = rest.currentTarget.getBoundingClientRect();
+        if (mouse.x !== pageX) {
+          const cross = clientX + initialMovementOffset[0];
+          let left: string;
+          if (pageX > mouse.x) {
+            left = `${x < (rectBounding.width - width) ? cross : x}px`;
+          } else {
+            left = `${x > rectBounding.x ? cross : x}px`;
+          }
+          pickerRef.current.style.left = left;
+        }
+        if (mouse.y !== pageY) {
+          const axis = clientY + initialMovementOffset[1];
+          let top: string;
+          if (pageY > mouse.y) {
+            top = `${y < rectBounding.height - height ? axis : y}px`;
+          } else {
+            top = `${y > rectBounding.y ? axis : y}px`;
+          }
+          pickerRef.current.style.top = top;
+        }
+        mouseRef.current = { x: pageX, y: pageY };
       }
     }
   }, [initialMovementOffset, isDragging, isInteractivityEnabled, rectBounding]);
@@ -126,7 +146,7 @@ const Picker = React.forwardRef<ImperativePickerProps, PickerProps>(({ initial, 
           pickerRef.current.style.pointerEvents = rectBounding ? 'auto' : 'none';
           pickerRef.current.style.cursor = rectBounding ? 'grab' : 'default';
         }
-        if (image === null) {
+        if (!image) {
           handleReset();
         }
       }
