@@ -52,7 +52,7 @@
       "error",
       {
         "multiline": true,
-        "minProperties": 5
+        "minProperties": 6
       }
     ],
     "import-helpers/order-imports": [
