@@ -23,10 +23,10 @@ const Image = styled.img`
 const PickerArea = styled.div`
   display: none;
   position: fixed;
-  top: 0;
   border: 2px dashed #fff;
   box-shadow: 0 0 1px 0px rgba(0,0,0,1);
   pointer-events: none;
+  z-index: 999;
 `;
 
 export { Image, PickerArea, styles };
