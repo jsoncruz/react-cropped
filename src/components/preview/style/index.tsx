@@ -13,7 +13,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
-const Image = styled.img`
+const Img = styled.img`
   user-select: none;
   -o-user-select: none;
   -moz-user-select: none;
@@ -29,4 +29,4 @@ const PickerArea = styled.div`
   z-index: 999;
 `;
 
-export { Image, PickerArea, styles };
+export { Img, PickerArea, styles };
