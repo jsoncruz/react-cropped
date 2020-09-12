@@ -9,7 +9,7 @@ interface CroppedContextProps {
 
 const Context = createContext<CroppedContextProps>({} as CroppedContextProps);
 
-const ContextProvider: React.FC = ({ children }) => {
+const CroppedContext: React.FC = ({ children }) => {
   const [image, setImage] = useState<Result>();
   return (
     <Context.Provider value={{ image, setImage } as CroppedContextProps}>
@@ -18,5 +18,5 @@ const ContextProvider: React.FC = ({ children }) => {
   );
 };
 
-export default ContextProvider;
+export default CroppedContext;
 export { Context };
