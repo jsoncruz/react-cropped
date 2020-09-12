@@ -12,7 +12,6 @@ import { Context } from '../../context';
 import { PickerArea } from './style';
 
 export type MouseHandling = ((event: React.MouseEvent<HTMLImageElement, MouseEvent>) => void);
-export type MouseFocusal = ((event: React.FocusEvent<HTMLImageElement>) => void);
 
 export interface PickerInitialCoordsProps {
   startX: number;
@@ -162,8 +161,8 @@ const Picker = React.forwardRef<ImperativePickerProps, PickerProps>(({ initial, 
   useImperativeHandle(ref, () => ({
     picker: pickerRef.current,
     clear: () => handleReset(),
-    isPicked: !!rectBounding,
-  }), [handleReset, rectBounding]);
+    isPicked: !!final && !isInteractivityEnabled,
+  }), [final, handleReset, isInteractivityEnabled]);
 
   return (
     <PickerArea
