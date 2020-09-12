@@ -2,14 +2,14 @@ import React from 'react';
 
 import ReactDOM from 'react-dom';
 
-import ContextProvider from './context';
+import CroppedContext from './context';
 import Example from './example';
 
 ReactDOM.render(
   <React.StrictMode>
-    <ContextProvider>
+    <CroppedContext>
       <Example />
-    </ContextProvider>
+    </CroppedContext>
   </React.StrictMode>,
   document.getElementById('root'),
 );
